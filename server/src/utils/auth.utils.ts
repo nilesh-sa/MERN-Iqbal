@@ -48,7 +48,7 @@ export function generateJWT(
 export function verifyJWT(token: string): object | null {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    return decoded as object;
+    return decoded as any;
   } catch (err) {
     // token invalid or expired
     return null;
