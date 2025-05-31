@@ -13,3 +13,29 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+enum UserType {
+  USER
+  ADMIN
+}
+model User {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  username  String   @unique
+  email     String   @unique
+  password  String
+  userType  UserType   @default(USER) 
+  isActive  Boolean  @default(false)
+  isVerified Boolean @default(false)
+  failledLoginAttempts Int @default(0)
+  failedLoginAt DateTime?
+  blockUntil DateTime?
+  passwordResetToken String?
+  passwordResetExpires DateTime?
+  emailVerificationToken String?
+  emailVerificationExpires DateTime?
+  profilePicture String 
+  dob       DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
