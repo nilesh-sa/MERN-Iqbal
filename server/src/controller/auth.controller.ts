@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "../lib/prisma";
-import { comparePassword, generateJWT, hashPassword } from "../utils/auth.utils";
+import { comparePassword, generateJWT, hashPassword, verifyJWT } from "../utils/auth.utils";
 const registerUser = async (
   req: Request,
   res: Response,
@@ -124,4 +124,61 @@ const userLogin = async (
   }
 };
 
-export { registerUser, userLogin };
+const VerifyUserAccount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<any> => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ error: 'Token is required.' });
+    }
+
+    // Decode the token
+    const decoded: any = await verifyJWT(token);
+    if (!decoded?.id) {
+      return res.status(400).json({ error: 'Invalid or expired token.' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ error: 'User is already verified.' });
+    }
+
+    // Optional: check if token matches and not expired
+    const now = new Date();
+    if (
+      user.emailVerificationToken !== token ||
+      !user.emailVerificationExpires ||
+      user.emailVerificationExpires < now
+    ) {
+      return res.status(400).json({ error: 'Token is invalid or expired.' });
+    }
+
+    // Update verification status and clear token fields
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isVerified: true,
+        isActive: true,
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
+      },
+    });
+
+    return res.status(200).json({ message: 'User account verified successfully' });
+  } catch (error) {
+    console.error('Verification Error:', error);
+    return res.status(500).json({ error: 'Something went wrong.' });
+  }
+};
+
+export { registerUser, userLogin , VerifyUserAccount };
