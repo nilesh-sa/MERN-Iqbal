@@ -1,6 +1,17 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "../lib/prisma";
 import { comparePassword, generateJWT, hashPassword, verifyJWT } from "../utils/auth.utils";
+interface AuthUser {
+ id: string;
+  role: string;
+}
+interface AuthReq extends Request {
+ user?:{
+  id: string;
+  role: string;
+ }
+}
+
 const registerUser = async (
   req: Request,
   res: Response,
@@ -181,4 +192,40 @@ const VerifyUserAccount = async (
   }
 };
 
-export { registerUser, userLogin , VerifyUserAccount };
+const changedPassword = async (
+  req: AuthReq,
+  res: Response,
+  next: NextFunction
+): Promise<any> => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const { id } = req?.user as AuthUser;
+
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    const isOldPasswordValid = await comparePassword(currentPassword, user.password);
+    if (!isOldPasswordValid) {
+      return res.status(400).json({ error: 'Old password is incorrect.' });
+    }
+
+    const hashedNewPassword = await hashPassword(newPassword);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedNewPassword },
+    });
+
+    return res.status(200).json({ message: 'Password changed successfully.' });
+  } catch (error) {
+    console.error('Change Password Error:', error);
+    return res.status(500).json({ error: 'Something went wrong.' });
+  }
+}
+
+
+export { registerUser, userLogin , VerifyUserAccount ,changedPassword , AuthReq,AuthUser};
