@@ -1,7 +1,7 @@
 import express from 'express';
-import { registerUser } from '../controller/auth.controller'; // Adjust the import path as necessary
+import { registerUser, userLogin } from '../controller/auth.controller'; // Adjust the import path as necessary
 import handleValidation from '../middleware/validator/validator';
-import { registerValidation } from '../validations/auth.validations';
+import { loginValidation, registerValidation } from '../validations/auth.validations';
 import { uploadSingle } from '../middleware/multer/upload';
 const router = express.Router();
 
@@ -15,6 +15,11 @@ router.post(
     ]),
   handleValidation(registerValidation),
   registerUser
+);
+router.post(
+  '/login',
+  handleValidation(loginValidation),
+  userLogin 
 );
 
 export default router;
