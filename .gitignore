@@ -4,3 +4,4 @@
 /server/.env
 /server/generated/ 
 /server/dist
+/server/uploads
