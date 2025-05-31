@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, userLogin } from '../controller/auth.controller'; // Adjust the import path as necessary
+import { registerUser, userLogin, VerifyUserAccount } from '../controller/auth.controller'; // Adjust the import path as necessary
 import handleValidation from '../middleware/validator/validator';
 import { loginValidation, registerValidation } from '../validations/auth.validations';
 import { uploadSingle } from '../middleware/multer/upload';
@@ -20,6 +20,10 @@ router.post(
   '/login',
   handleValidation(loginValidation),
   userLogin 
+);
+router.post(
+"/verifyAccount",
+VerifyUserAccount 
 );
 
 export default router;
