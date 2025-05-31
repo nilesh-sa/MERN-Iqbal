@@ -12,6 +12,6 @@
     "moduleResolution": "node",
     "resolveJsonModule": true
   },
-  "include": ["src"],
+  "include": ["./src"],           // 👈 only compile src
   "exclude": ["node_modules", "dist"]
 }
