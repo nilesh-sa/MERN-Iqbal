@@ -1,13 +1,17 @@
 import path from 'path';
 import multer from 'multer';
 import { Request, Response, NextFunction } from 'express';
-
+import fs from 'fs';
 // Type aliases
 type MulterFileType = Express.Multer.File;
 type MulterCallBackType = multer.FileFilterCallback;
 
 // ✨ Reusable function to create a multer instance dynamically
 const createMulterUpload = (allowedMimeTypes: string[]) => {
+   const uploadDir = path.join(process.cwd(), 'uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
   // Disk storage setup
   const storage = multer.diskStorage({
     destination: function (req: Request, file: MulterFileType, cb) {
