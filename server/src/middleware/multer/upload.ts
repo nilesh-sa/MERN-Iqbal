@@ -20,19 +20,25 @@ const createMulterUpload = (allowedMimeTypes: string[]) => {
   });
 
   // File type filter
-  const fileFilter = function (req: Request, file: MulterFileType, cb: MulterCallBackType) {
-    if (allowedMimeTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(null, false); // You can also use: cb(new Error("Invalid file type"), false);
-    }
-  };
+ // File type filter
+const fileFilter = function (req: Request, file: MulterFileType, cb: MulterCallBackType) {
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      new Error(
+        `Invalid file type: ${file.mimetype}. Only allowed: ${allowedMimeTypes.join(', ')}`
+      )
+    );
+  }
+};
+
 
   // Return multer instance
   return multer({
     storage,
     limits: {
-      fileSize: 1024 * 1024 * 5, // 5MB
+      fileSize: 1024 * 1024 * 10,
     },
     fileFilter
   });
