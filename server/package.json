@@ -2,9 +2,16 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/app.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev":"nodemon src/app.ts",
+    "start": "ts-node src/app.ts",
+    "build": "tsc",
+    "migrate": "prisma migrate dev --name init",
+    "generate": "prisma generate",
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .ts,.tsx"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +19,7 @@
   "dependencies": {
     "@prisma/client": "^6.8.2",
     "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
@@ -21,6 +29,10 @@
     "prisma": "^6.8.2"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.29",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }
