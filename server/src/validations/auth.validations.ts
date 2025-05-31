@@ -78,4 +78,30 @@ const loginValidation = [
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
-export { registerValidation, loginValidation };
+const passwordUpdateValidation = [
+  body("currentPassword")
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters")
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/
+    )
+    .withMessage(
+      "Password must include uppercase, lowercase, number, and special character"
+    ),
+
+  body("newPassword")
+    .notEmpty()
+    .withMessage("New password is required")
+    .isLength({ min: 8 })
+    .withMessage("New password must be at least 8 characters")
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/
+    )
+    .withMessage(
+      "New password must include uppercase, lowercase, number, and special character"
+    ),
+];
+
+export { registerValidation, loginValidation ,passwordUpdateValidation};
