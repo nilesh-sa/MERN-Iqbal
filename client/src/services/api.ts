@@ -68,7 +68,7 @@ const getAllMyAddressApiHandler = async (searchQuery: string,token:string): Prom
   try {
      let url= '/address/all';
      if(searchQuery!=='') {
-      url += `?${searchQuery}`;
+      url += `?search=${searchQuery}`;
       }
 
     const response = await axiosInstance.get(url, {
