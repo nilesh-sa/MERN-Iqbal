@@ -1,73 +1,178 @@
-# Welcome to your Lovable project
 
-## Project info
+# 🔐 Full-Stack Authentication App (React + Node.js + Prisma)
 
-**URL**: https://lovable.dev/projects/e8070168-f5d9-46ad-afdc-98dcde687311
+A complete full-stack authentication system with:
 
-## How can I edit this code?
+- ✅ Email Verification
+- ✅ User Account Activation
+- ✅ JWT-based Authentication
+- ✅ TypeScript Support (Frontend & Backend)
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## 📁 Project Structure
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e8070168-f5d9-46ad-afdc-98dcde687311) and start prompting.
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+.
+├── client/         # React + TypeScript (Frontend)
+└── server/         # Express + Prisma + MySQL (Backend)
 
-**Use your preferred IDE**
+````
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## ⚙️ Prerequisites
 
-Follow these steps:
+- Node.js (v18+)
+- npm or yarn
+- MySQL (e.g., XAMPP or standalone)
+- SMTP credentials (Gmail, Mailtrap, etc.)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🛠 Setup Instructions
 
-# Step 3: Install the necessary dependencies.
-npm i
+### 🔧 1. Backend Setup (`/server`)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+#### 📥 Install Dependencies
+
+```bash
+cd server
+npm install
+````
+
+#### ⚙️ Environment Variables
+
+Create a `.env` file:
+
+```env
+DATABASE_URL="mysql://USER:PASSWORD@localhost:3306/DATABASE_NAME"
+JWT_SECRET="your_jwt_secret"
+EMAIL_USER="your_email@example.com"
+EMAIL_PASS="your_email_app_password"
+EMAIL_HOST="smtp.example.com"
+EMAIL_PORT=465
+FRONTEND_URL=http://localhost:8080
+PORT=5000
+```
+
+#### 🗃️ Initialize Prisma & DB
+
+```bash
+npx prisma generate
+npx prisma migrate dev --name init
+```
+
+#### 🌱 Optional: Seed Demo User
+
+```bash
+npm run seed
+```
+
+#### ▶️ Run Server
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+> ✅ Server runs on `http://localhost:5000`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+### 🌐 2. Frontend Setup (`/client`)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+#### 📥 Install Dependencies
 
-## What technologies are used for this project?
+```bash
+cd client
+npm install
+```
 
-This project is built with:
+#### ⚙️ Environment Variables
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Create `.env`:
 
-## How can I deploy this project?
+```env
+VITE_API_BASE_URL=http://localhost:5000
+```
 
-Simply open [Lovable](https://lovable.dev/projects/e8070168-f5d9-46ad-afdc-98dcde687311) and click on Share -> Publish.
+#### ▶️ Run Frontend
 
-## Can I connect a custom domain to my Lovable project?
+```bash
+npm run dev
+```
 
-Yes, you can!
+> ✅ Frontend runs on `http://localhost:8080`
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## ✉️ Email Verification Flow
+
+1. User registers or a demo user is seeded.
+2. An email is sent with a verification link:
+
+   ```
+   http://localhost:8080/verify?token=<JWT_TOKEN>
+   ```
+3. The user clicks the link:
+
+   * ✅ Account gets verified
+   * ⚠️ Token expired or invalid → shows error
+
+---
+
+## ✅ Features
+
+* JWT-based token system
+* Nodemailer integration for email delivery
+* Prisma ORM with MySQL
+* Token expiration and cleanup
+* React status UI (loading/success/error)
+* API error handling and toasts
+
+---
+
+## 🚨 Troubleshooting
+
+| Issue             | Solution                                                            |
+| ----------------- | ------------------------------------------------------------------- |
+| DB not connecting | Check `DATABASE_URL` in `.env` and MySQL status                     |
+| No email sent     | Check SMTP config (`EMAIL_*`) or use Mailtrap                       |
+| Token expired     | Ensure token has not passed expiration (`emailVerificationExpires`) |
+| CORS issues       | Add correct `origin` in backend middleware                          |
+| Prisma error      | Run `npx prisma generate` again                                     |
+
+---
+
+## 🔐 Sample API Endpoints
+
+| Method | Endpoint               | Description                 |
+| ------ | ---------------------- | --------------------------- |
+| POST   | `/auth/register`       | Register user + email token |
+| POST   | `/auth/verifyAccount` | Verify email with token     |
+| POST   | `/auth/login`          | User login (JWT)            |
+
+---
+
+## 🧪 Test Flow
+
+* Register → check mail → click link
+* Backend updates user:
+
+  * `isVerified = true`
+  * `emailVerificationToken = null`
+* Token expires after configured time (default: 1h)
+
+---
+
+## 📦 Build for Production
+
+### Frontend
+
+```bash
+npm run build
+npm start 
+```
+
+
