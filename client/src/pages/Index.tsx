@@ -6,7 +6,7 @@ import { Dashboard } from '@/components/dashboard/Dashboard';
 import { getAxiosErrorMessage, loginApiHandler, signupApiHandler } from '@/services/api';
 import { toast } from 'sonner';
 
-interface User {
+export interface UserPropsType {
   id: string;
   firstName: string;
   lastName: string;
@@ -20,14 +20,18 @@ interface User {
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<'login' | 'register' | 'dashboard'>('login');
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserPropsType | null>(null);
 
   const handleLogin = async(loginData: any) => {
     try {
       const response = await loginApiHandler(loginData);
-      setUser(response.data.user);
-      setCurrentView('dashboard');
-      toast.success('Login successful!', { position: 'top-right' });
+      console.log('Login response:', response);
+      if(response.status==200) {
+        toast.success('Login successful!', { position: 'top-right' });
+        setCurrentView('dashboard');
+        setUser(response.data.user  || null);
+        return
+      }
     } catch (error) {
       const errorMes = getAxiosErrorMessage(error);
       toast.error(`Login failed: ${errorMes}`, { position: 'top-right' });
