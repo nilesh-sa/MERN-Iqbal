@@ -108,6 +108,18 @@ const updateAddressApiHandler = async (data: any, token:string,addressId:string)
     throw error;
   }
 }
+const deleteAddressApiHandler = async (addressId: string, token:string): Promise<AxiosResponse> => {
+  try {
+    return await axiosInstance.delete(`/address/delete/${addressId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`, // Include token in headers
+      },    
+    });
+  } catch (error) { 
+    console.error('Error deleting address:', error);
+    throw error;
+  }
+}
 
 export {
   signupApiHandler,
@@ -116,5 +128,6 @@ export {
   changePasswordApiHandler,
   getAllMyAddressApiHandler,
   addNewAddressApiHandler,
-  updateAddressApiHandler
+  updateAddressApiHandler,
+  deleteAddressApiHandler
 };
