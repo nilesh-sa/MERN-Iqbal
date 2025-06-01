@@ -1,27 +1,40 @@
+import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ProfileForm } from "@/components/profile/ProfileForm";
+import { AddressForm } from "@/components/address/AddressForm";
+import { AddressList } from "@/components/address/AddressList";
+import { User, MapPin, Plus, LogOut, Settings } from "lucide-react";
+import { UserPropsType } from "@/pages/Index";
+import { UpdatePassword } from "../auth/UpdatePassword";
+import {
+  addNewAddressApiHandler,
+  changePasswordApiHandler,
+  getAxiosErrorMessage,
+  updateAddressApiHandler,
+} from "@/services/api";
+import { toast } from "sonner";
+import { useGetAllMyAddressQuery } from "@/services/query";
+import { useQueryClient } from "@tanstack/react-query";
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ProfileForm } from '@/components/profile/ProfileForm';
-import { AddressForm } from '@/components/address/AddressForm';
-import { AddressList } from '@/components/address/AddressList';
-import { User, MapPin, Plus, LogOut, Settings } from 'lucide-react';
-import { UserPropsType } from '@/pages/Index';
-import { UpdatePassword } from '../auth/UpdatePassword';
-import { changePasswordApiHandler, getAxiosErrorMessage } from '@/services/api';
-import { toast } from 'sonner';
-
-
-interface Address {
+export interface AddressPropType {
   id: string;
-  street: string;
+  title: string;
+  houseNumber: string;
+  buildingName: string;
+  addressLine1: string;
+  addressLine2: string;
   city: string;
   state: string;
   zipCode: string;
-  country: string;
-  isDefault?: boolean;
-  token:string;
+  isDefault: boolean;
 }
 
 interface DashboardProps {
@@ -30,81 +43,119 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
-  const [addresses, setAddresses] = useState<Address[]>([
-    {
-      id: '1',
-      street: '123 Main St',
-      city: 'Anytown',
-      state: 'CA',
-      zipCode: '12345',
-      country: 'USA',
-      isDefault: true
-    }
-  ]);
-  
+  const [addresses, setAddresses] = useState<AddressPropType[]>([]);
+
   const [showAddressForm, setShowAddressForm] = useState(false);
-  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [editingAddress, setEditingAddress] = useState<AddressPropType | null>(
+    null
+  );
+  const [searchquery, setSearchQuery] = useState("");
+  const addressQuery = useGetAllMyAddressQuery(searchquery, user.token);
+  const queryclient = useQueryClient();
+  const [isFormModified, setIsFormModified] = useState(false);
+  console.log("Address Query:", addressQuery.data);
+  console.log('isFormModified:', isFormModified);
 
   const handleProfileUpdate = (profileData: any) => {
-    console.log('Profile updated:', profileData);
+    console.log("Profile updated:", profileData);
     // Here you would typically update the user data in your backend
   };
 
-  const handleAddressSubmit = (addressData: any) => {
-    if (editingAddress) {
-      // Update existing address
-      setAddresses(prev => 
-        prev.map(addr => 
-          addr.id === editingAddress.id 
-            ? { ...addr, ...addressData }
-            : addr
-        )
-      );
-    } else {
-      // Add new address
-      const newAddress = {
-        id: Date.now().toString(),
-        ...addressData
-      };
-      setAddresses(prev => [...prev, newAddress]);
+ const handleAddNewAddress = async (addressData: any) => {
+  try {
+    const newAddressApiResponse = await addNewAddressApiHandler(
+      addressData,
+      user.token
+    );
+    if (newAddressApiResponse.status === 201) {
+      toast.success("Address added successfully!", {
+        position: "top-right",
+      });
+      queryclient.refetchQueries({
+        queryKey: ["getAllMyAddress"],
+      });
     }
-    
+    setShowAddressForm(false);
+  } catch (error) {
+    const errMes = getAxiosErrorMessage(error);
+    toast.error(`Address submission failed: ${errMes}`, {
+      position: "top-right",
+    });
+  }
+};
+
+const handleUpdateAddress = async (addressData: any,addressId:string) => {
+  try {
+    const updatedAddressApiRes = await updateAddressApiHandler(addressData, user.token,addressId);
+    if (updatedAddressApiRes.status === 200) {
+      toast.success("Address updated successfully!", {
+        position: "top-right",
+      });
+      queryclient.refetchQueries({
+        queryKey: ["getAllMyAddress"],
+      });
+    }
     setShowAddressForm(false);
     setEditingAddress(null);
-  };
+  } catch (error) {
+    const errMes = getAxiosErrorMessage(error);
+    toast.error(`Address update failed: ${errMes}`, {
+      position: "top-right",
+    });
+  }
+};
 
-  const handleEditAddress = (address: Address) => {
+const handleAddressSubmit = async (addressData: any) => {
+  if (editingAddress && isFormModified) {
+    await handleUpdateAddress(addressData, editingAddress.id);
+  } else if (!editingAddress) {
+    await handleAddNewAddress(addressData);
+  } else {
+    // If form is not modified but editing, just close the form
+    setShowAddressForm(false);
+    setEditingAddress(null);
+  }
+};
+
+  const handleEditAddress = (address: AddressPropType) => {
     setEditingAddress(address);
     setShowAddressForm(true);
   };
 
   const handleDeleteAddress = (id: string) => {
-    setAddresses(prev => prev.filter(addr => addr.id !== id));
+    setAddresses((prev) => prev.filter((addr) => addr.id !== id));
   };
 
   const handleSetDefaultAddress = (id: string) => {
-    setAddresses(prev => 
-      prev.map(addr => ({
+    setAddresses((prev) =>
+      prev.map((addr) => ({
         ...addr,
-        isDefault: addr.id === id
+        isDefault: addr.id === id,
       }))
     );
   };
-  const updatePasswordHandler= async (data: any) => {
-     try {
-      const response = await changePasswordApiHandler(data,user.token);
+  const updatePasswordHandler = async (data: any) => {
+    try {
+      const response = await changePasswordApiHandler(data, user.token);
       if (response.status === 200) {
-        toast.success('Password updated successfully!', { position: 'top-right' });
+        toast.success("Password updated successfully!", {
+          position: "top-right",
+        });
         onLogout(); // Optionally log out user after password change
-      return;
+        return;
       }
-      
-     } catch (error) {
-       const errMes= getAxiosErrorMessage(error);
-       toast.error(`Password update failed: ${errMes}`, { position: 'top-right' });
-     }
-  }
-
+    } catch (error) {
+      const errMes = getAxiosErrorMessage(error);
+      toast.error(`Password update failed: ${errMes}`, {
+        position: "top-right",
+      });
+    }
+  };
+  useEffect(() => {
+    if (addressQuery.isSuccess && addressQuery.data) {
+      setAddresses(addressQuery.data?.data?.addresses || []);
+    }
+  }, [addressQuery.data]);
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto">
@@ -120,7 +171,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
-          
           <TabsList className="grid w-full  md:grid-cols-3 grid-col gap-2 ">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
@@ -130,17 +180,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               <MapPin className="h-4 w-4" />
               Addresses
             </TabsTrigger>
-             <TabsTrigger value="changePassword" className="flex items-center gap-2">
+            <TabsTrigger
+              value="changePassword"
+              className="flex items-center gap-2"
+            >
               <Settings className="h-4 w-4" />
               Change Password
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="mt-6">
-            <ProfileForm
-              initialData={user}
-              onSubmit={handleProfileUpdate}
-            />
+            <ProfileForm initialData={user} onSubmit={handleProfileUpdate} />
           </TabsContent>
 
           <TabsContent value="addresses" className="mt-6">
@@ -162,6 +212,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                     setEditingAddress(null);
                   }}
                   title={editingAddress ? "Edit Address" : "Add New Address"}
+                  isFormModified={(isDirty) => setIsFormModified(isDirty)}
+            
+                  
                 />
               ) : (
                 <AddressList
@@ -177,11 +230,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             <Card>
               <CardHeader>
                 <CardTitle>Update Your Password Here</CardTitle>
-                
               </CardHeader>
               <CardContent>
-                
-            <UpdatePassword onSubmit={updatePasswordHandler}/>
+                <UpdatePassword onSubmit={updatePasswordHandler} />
               </CardContent>
             </Card>
           </TabsContent>
