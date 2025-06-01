@@ -7,15 +7,8 @@ import { ProfileForm } from '@/components/profile/ProfileForm';
 import { AddressForm } from '@/components/address/AddressForm';
 import { AddressList } from '@/components/address/AddressList';
 import { User, MapPin, Plus, LogOut } from 'lucide-react';
+import { UserPropsType } from '@/pages/Index';
 
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  bio?: string;
-}
 
 interface Address {
   id: string;
@@ -28,7 +21,7 @@ interface Address {
 }
 
 interface DashboardProps {
-  user: User;
+  user: UserPropsType;
   onLogout: () => void;
 }
 
