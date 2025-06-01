@@ -3,7 +3,7 @@ import { NextFunction, Response } from "express";
 import { AuthReq, AuthUser } from "./auth.controller";
 import prisma from "../lib/prisma";
 
- const getAllAddresses = async (
+const getAllAddresses = async (
   req: AuthReq,
   res: Response,
   next: NextFunction
@@ -11,21 +11,20 @@ import prisma from "../lib/prisma";
   const { id } = req?.user as AuthUser;
 
   try {
-    const { title, city, state } = req.query;
+    const { search } = req.query;
 
-    // Build dynamic filter
     const where: any = {
       userId: id,
     };
 
-    if (title) {
-      where.title = String(title);
-    }
-    if (city) {
-      where.city = String(city);
-    }
-    if (state) {
-      where.state = String(state);
+    if (search) {
+      const q = String(search).trim();
+
+      where.OR = [
+        { title: { contains: q } },
+        { city: { contains: q } },
+        { state: { contains: q } },
+      ];
     }
 
     const addresses = await prisma.address.findMany({
@@ -44,6 +43,7 @@ import prisma from "../lib/prisma";
     return res.status(500).json({ error: "Something went wrong" });
   }
 };
+
 const getAddressesByTitle = async (
   req: AuthReq,
   res: Response,
