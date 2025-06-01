@@ -24,6 +24,8 @@ import {
 import { toast } from "sonner";
 import { useGetAllMyAddressQuery } from "@/services/query";
 import { useQueryClient } from "@tanstack/react-query";
+import { Input } from "../ui/input";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export interface AddressPropType {
   id: string;
@@ -51,6 +53,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     null
   );
   const [searchquery, setSearchQuery] = useState("");
+  const [userSearchInput, setUserSearchInput] = useState("");
+  const debouncedSearchValue= useDebounce(userSearchInput, 500);
   const addressQuery = useGetAllMyAddressQuery(searchquery, user.token);
   const queryclient = useQueryClient();
   const [isFormModified, setIsFormModified] = useState(false);
@@ -142,7 +146,7 @@ const handleAddressSubmit = async (addressData: any) => {
       
     }
   };
-
+ console.log('searchquery:', searchquery);
   const handleSetDefaultAddress = (id: string) => {
     setAddresses((prev) =>
       prev.map((addr) => ({
@@ -173,6 +177,10 @@ const handleAddressSubmit = async (addressData: any) => {
       setAddresses(addressQuery.data?.data?.addresses || []);
     }
   }, [addressQuery.data]);
+ 
+   useEffect(()=>{
+    setSearchQuery(debouncedSearchValue);
+   },[debouncedSearchValue])
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto">
@@ -214,6 +222,14 @@ const handleAddressSubmit = async (addressData: any) => {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-semibold">Your Addresses</h2>
+                <Input 
+                  type="text"
+                  placeholder=" search by title ,city or state "
+                  value={userSearchInput}
+                  onChange={(e) => setUserSearchInput(e.target.value.trim())}
+                  className="w-1/3 "
+                
+                />
                 <Button onClick={() => setShowAddressForm(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Address
