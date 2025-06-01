@@ -58,11 +58,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const addressQuery = useGetAllMyAddressQuery(searchquery, user.token);
   const queryclient = useQueryClient();
   const [isFormModified, setIsFormModified] = useState(false);
-  console.log("Address Query:", addressQuery.data);
-  console.log('isFormModified:', isFormModified);
+  
+  
 
   const handleProfileUpdate = (profileData: any) => {
-    console.log("Profile updated:", profileData);
+    
     // Here you would typically update the user data in your backend
   };
 
@@ -146,7 +146,7 @@ const handleAddressSubmit = async (addressData: any) => {
       
     }
   };
- console.log('searchquery:', searchquery);
+ 
   const handleSetDefaultAddress = (id: string) => {
     setAddresses((prev) =>
       prev.map((addr) => ({
