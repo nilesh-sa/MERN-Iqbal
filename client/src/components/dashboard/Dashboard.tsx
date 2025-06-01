@@ -17,6 +17,7 @@ import { UpdatePassword } from "../auth/UpdatePassword";
 import {
   addNewAddressApiHandler,
   changePasswordApiHandler,
+  deleteAddressApiHandler,
   getAxiosErrorMessage,
   updateAddressApiHandler,
 } from "@/services/api";
@@ -122,8 +123,24 @@ const handleAddressSubmit = async (addressData: any) => {
     setShowAddressForm(true);
   };
 
-  const handleDeleteAddress = (id: string) => {
-    setAddresses((prev) => prev.filter((addr) => addr.id !== id));
+  const handleDeleteAddress = async(id: string) => {
+    try {
+       const deleteAddressApiResponse = await deleteAddressApiHandler(id, user.token);
+      if (deleteAddressApiResponse.status === 200) {
+        toast.success("Address deleted successfully!", {
+          position: "top-right",
+        });
+        queryclient.refetchQueries({
+          queryKey: ["getAllMyAddress"],
+        });
+      }
+    } catch (error) {
+      const errMes = getAxiosErrorMessage(error);
+      toast.error(`Address deletion failed: ${errMes}`, {
+        position: "top-right",
+      });
+      
+    }
   };
 
   const handleSetDefaultAddress = (id: string) => {
