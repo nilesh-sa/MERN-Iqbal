@@ -50,8 +50,25 @@ const loginApiHandler = async (data: any):Promise<AxiosResponse> => {
   }
 };
 
+const changePasswordApiHandler = async (data: any, token:string):Promise<AxiosResponse> => {
+  try {
+    return await axiosInstance.patch('/auth/updatePassword', data ,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`, // Include token in headers
+        },
+      }
+    );
+  } catch (error) {
+    console.error('Error during password change:', error);
+    throw error;
+  }
+}
+
+
 export {
   signupApiHandler,
   loginApiHandler,
-  getAxiosErrorMessage
+  getAxiosErrorMessage,
+  changePasswordApiHandler
 };
