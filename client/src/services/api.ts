@@ -32,7 +32,7 @@ const signupApiHandler = async (data: FormData):Promise<AxiosResponse> => {
         'Content-Type': 'multipart/form-data', // Must override for FormData
       },
     });
-    return response.data;
+    return response
   } catch (error) {
     console.error('Error during signup:', error);
     throw error;
@@ -42,8 +42,8 @@ const signupApiHandler = async (data: FormData):Promise<AxiosResponse> => {
 // ✅ Login API
 const loginApiHandler = async (data: any):Promise<AxiosResponse> => {
   try {
-    const response = await axiosInstance.post('/auth/login', data);
-    return response.data;
+     return  await axiosInstance.post('/auth/login', data);
+  
   } catch (error) {
     console.error('Error during login:', error);
     throw error;
