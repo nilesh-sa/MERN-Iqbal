@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "../lib/prisma";
 import { comparePassword, generateJWT, hashPassword, verifyJWT } from "../utils/auth.utils";
+import { sendEmail } from "../lib/nodemailer";
 interface AuthUser {
  id: string;
   role: string;
@@ -43,8 +44,30 @@ const registerUser = async (
         profilePicture,
       },
     });
+    // Generate email verification token
+    const emailVerificationToken = generateJWT({ id: user.id, role: user.userType }, "1d");
+    const emailVerificationExpires = new Date();
+    emailVerificationExpires.setDate(emailVerificationExpires.getDate() + 1); // Token valid for 1 day
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerificationToken,
+        emailVerificationExpires,
+      },
+    });
+    // Send verification email
+     await sendEmail(
+      user.email,
+      "Verify Your Account",
+      `<p>Hi ${user.firstName},</p>
+      <p>Thank you for registering! Please verify your account by clicking the link below:</p> 
+      <p><a href="${process.env.FRONTEND_URL}/verify?token=${emailVerificationToken}" target="_blank">Verify Account</a></p>
+      <p>If you did not create this account, please ignore this email.</p>
+      <p>Best regards,</p>
+      <p>Operation Team</p>`
+    );
     res.status(201).send({
-      message: "User registered successfully",
+      message: "User registered successfully.Please check your email to verify your account.",
     });
   } catch (error) {
     console.error("Create User Error:", error);
@@ -159,7 +182,7 @@ const VerifyUserAccount = async (
     }
 
     // Decode the token
-    const decoded: any = await verifyJWT(token);
+    const decoded: any =  verifyJWT(token);
     if (!decoded?.id) {
       return res.status(400).json({ error: 'Invalid or expired token.' });
     }
@@ -170,10 +193,6 @@ const VerifyUserAccount = async (
 
     if (!user) {
       return res.status(404).json({ error: 'User not found.' });
-    }
-
-    if (user.isVerified) {
-      return res.status(400).json({ error: 'User is already verified.' });
     }
 
     // Optional: check if token matches and not expired
