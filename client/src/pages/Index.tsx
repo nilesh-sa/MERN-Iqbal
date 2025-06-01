@@ -5,6 +5,7 @@ import { RegisterForm } from '@/components/auth/RegisterForm';
 import { Dashboard } from '@/components/dashboard/Dashboard';
 import { getAxiosErrorMessage, loginApiHandler, signupApiHandler } from '@/services/api';
 import { toast } from 'sonner';
+import { useSearchParams } from 'react-router-dom';
 
 export interface UserPropsType {
   id: string;
@@ -22,6 +23,10 @@ export interface UserPropsType {
 const Index = () => {
   const [currentView, setCurrentView] = useState<'login' | 'register' | 'dashboard'>('login');
   const [user, setUser] = useState<UserPropsType | null>(null);
+  const searchParams= useSearchParams();
+  
+
+
 
   const handleLogin = async(loginData: any) => {
     try {
@@ -47,7 +52,7 @@ const Index = () => {
   const handleRegister = async(registerData: any) => {
     try {
       const response= await signupApiHandler(registerData);
-      toast.success('Registration successful! Please log in.',{position:'top-right'});
+      toast.success( response.data?.message ||  'Registration successful! Please log in.',{position:'top-right'});
       setCurrentView('login');
 
     } catch (error) {
