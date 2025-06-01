@@ -16,6 +16,7 @@ export interface UserPropsType {
   profilePicture?: string;
   username?: string;
   dateOfBirth?: Date;
+  token: string;
 }
 
 const Index = () => {
@@ -29,7 +30,11 @@ const Index = () => {
       if(response.status==200) {
         toast.success('Login successful!', { position: 'top-right' });
         setCurrentView('dashboard');
-        setUser(response.data.user  || null);
+        if (response.data && response.data.user) {
+          setUser({ ...response.data.user, token: response.data.token });
+        } else {
+          setUser(null);
+        }
         return
       }
     } catch (error) {
