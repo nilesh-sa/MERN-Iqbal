@@ -121,6 +121,16 @@ const deleteAddressApiHandler = async (addressId: string, token:string): Promise
   }
 }
 
+const verifyUserAccountApiHandler = async (token: string): Promise<AxiosResponse> => {
+  try {
+    const response = await axiosInstance.post('/auth/verifyAccount', { token });
+    return response;
+  } catch (error) {
+    console.error('Error verifying user account:', error);
+    throw error;
+  }
+}
+
 export {
   signupApiHandler,
   loginApiHandler,
@@ -129,5 +139,6 @@ export {
   getAllMyAddressApiHandler,
   addNewAddressApiHandler,
   updateAddressApiHandler,
-  deleteAddressApiHandler
+  deleteAddressApiHandler,
+  verifyUserAccountApiHandler
 };
