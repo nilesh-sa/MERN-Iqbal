@@ -100,6 +100,7 @@ const userLogin = async (
       const updates: any = {
         failledLoginAttempts: updatedFailedAttempts,
         failedLoginAt: new Date(),
+        isActive:true
       };
 
       // If failed attempts exceed limit, block user
@@ -107,6 +108,7 @@ const userLogin = async (
         const blockUntil = new Date();
         blockUntil.setMinutes(blockUntil.getMinutes() + BLOCK_DURATION_MINUTES);
         updates.blockUntil = blockUntil;
+        updates.isActive= false; 
       }
 
       await prisma.user.update({
@@ -128,7 +130,17 @@ const userLogin = async (
     });
     const token = generateJWT({id:user.id,role:user.userType},"1h")
     // Send response or JWT token
-    return res.status(200).json({ message: "Login successful", token });
+    return res.status(200).json({ message: "Login successful", token ,
+      user:{
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        email: user.email,
+        profilePicture: user.profilePicture,
+      }
+
+    });
   } catch (error) {
     console.error("Login Error:", error);
     return res.status(500).json({ error: "Something went wrong." });
