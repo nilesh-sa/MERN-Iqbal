@@ -64,11 +64,57 @@ const changePasswordApiHandler = async (data: any, token:string):Promise<AxiosRe
     throw error;
   }
 }
+const getAllMyAddressApiHandler = async (searchQuery: string,token:string): Promise<AxiosResponse> => {
+  try {
+     let url= '/address/all';
+     if(searchQuery!=='') {
+      url += `?${searchQuery}`;
+      }
 
+    const response = await axiosInstance.get(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`, 
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error('Error fetching addresses:', error);
+    throw error;
+  }
+}
+
+const addNewAddressApiHandler = async (data: any, token:string): Promise<AxiosResponse> => {
+  try {
+    return await axiosInstance.post('/address/addNew', data, {
+      headers: {
+        'Authorization': `Bearer ${token}`, // Include token in headers
+      },
+    });
+  } catch (error) {
+    console.error('Error adding new address:', error);
+    throw error;
+  }
+}
+
+const updateAddressApiHandler = async (data: any, token:string,addressId:string): Promise<AxiosResponse> => {
+  try {
+    return await axiosInstance.put(`/address/update/${addressId}`, data, {
+      headers: {
+        'Authorization': `Bearer ${token}`, // Include token in headers
+      },
+    });
+  } catch (error) {
+    console.error('Error updating address:', error);
+    throw error;
+  }
+}
 
 export {
   signupApiHandler,
   loginApiHandler,
   getAxiosErrorMessage,
-  changePasswordApiHandler
+  changePasswordApiHandler,
+  getAllMyAddressApiHandler,
+  addNewAddressApiHandler,
+  updateAddressApiHandler
 };
