@@ -26,7 +26,7 @@ const Index = () => {
   const handleLogin = async(loginData: any) => {
     try {
       const response = await loginApiHandler(loginData);
-      console.log('Login response:', response);
+      
       if(response.status==200) {
         toast.success('Login successful!', { position: 'top-right' });
         setCurrentView('dashboard');
