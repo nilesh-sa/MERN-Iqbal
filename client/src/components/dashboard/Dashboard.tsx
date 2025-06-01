@@ -6,8 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ProfileForm } from '@/components/profile/ProfileForm';
 import { AddressForm } from '@/components/address/AddressForm';
 import { AddressList } from '@/components/address/AddressList';
-import { User, MapPin, Plus, LogOut } from 'lucide-react';
+import { User, MapPin, Plus, LogOut, Settings } from 'lucide-react';
 import { UserPropsType } from '@/pages/Index';
+import { UpdatePassword } from '../auth/UpdatePassword';
+import { changePasswordApiHandler, getAxiosErrorMessage } from '@/services/api';
+import { toast } from 'sonner';
 
 
 interface Address {
@@ -18,6 +21,7 @@ interface Address {
   zipCode: string;
   country: string;
   isDefault?: boolean;
+  token:string;
 }
 
 interface DashboardProps {
@@ -86,6 +90,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       }))
     );
   };
+  const updatePasswordHandler= async (data: any) => {
+     try {
+      const response = await changePasswordApiHandler(data,user.token);
+      if (response.status === 200) {
+        toast.success('Password updated successfully!', { position: 'top-right' });
+        onLogout(); // Optionally log out user after password change
+      return;
+      }
+      
+     } catch (error) {
+       const errMes= getAxiosErrorMessage(error);
+       toast.error(`Password update failed: ${errMes}`, { position: 'top-right' });
+     }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -102,7 +120,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          
+          <TabsList className="grid w-full  md:grid-cols-3 grid-col gap-2 ">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               Profile
@@ -110,6 +129,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             <TabsTrigger value="addresses" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               Addresses
+            </TabsTrigger>
+             <TabsTrigger value="changePassword" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Change Password
             </TabsTrigger>
           </TabsList>
 
@@ -149,6 +172,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 />
               )}
             </div>
+          </TabsContent>
+          <TabsContent value="changePassword" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Update Your Password Here</CardTitle>
+                
+              </CardHeader>
+              <CardContent>
+                
+            <UpdatePassword onSubmit={updatePasswordHandler}/>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
